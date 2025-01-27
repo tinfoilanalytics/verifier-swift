@@ -1,3 +1,8 @@
 .idea/
 .build/
 verifier/
+xcuserdata/
+DerivedData/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/
+.swiftpm/xcode/xcuserdata/
