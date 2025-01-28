@@ -37,3 +37,12 @@ struct Document: Decodable {
 enum PredicateType: String, Decodable {
     case awsNitroEnclaveV1 = "https://tinfoil.sh/predicate/aws-nitro-enclave/v1"
 }
+
+public struct TinfoilVerifier {
+    ///client should store this and have policy for refetch
+    //since this reaches into sigstore/tuf, maybe live with this being
+    //a blocking sync method
+    public static func fetchTrustRoot() async throws -> Data {
+        throw TinfoilError.mocking
+    }
+}

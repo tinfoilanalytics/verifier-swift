@@ -10,26 +10,6 @@ import Foundation
 import TinfoilVerifier
 
 ///Main App interface
-
-public struct TinfoilVerifier {
-    ///client should store this and have policy for refetch
-    //since this reaches into sigstore/tuf, maybe live with this being
-    //a blocking sync method
-    public static func fetchTrustRoot() async throws -> [Data] {
-        throw TinfoilError.mocking
-    }
-
-    //synchronous variant of the above
-    public static func fetchTrustRoot(
-        completionHandler: @escaping (Result<Data, Error>) -> Void
-    ) {
-        DispatchQueue.global().async {
-            completionHandler(.failure(TinfoilError.mocking))
-        }
-
-    }
-}
-
 public struct TinfoilClient: Codable, Sendable {
     public let enclave: String
     public let repo: String
@@ -45,7 +25,6 @@ public struct TinfoilClient: Codable, Sendable {
     }
 
     public func verify(
-        enclaveState: ClientEnclaveState,
         sigStoreTrustRoot: Data  //cached by the application
     ) async throws -> EnclaveState {
         let (_, eifHash) = try await Github.fetchLatestRelease(repo: repo)
