@@ -23,7 +23,9 @@ struct Github {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.get.rawValue
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession(configuration: .ephemeral).data(
+            for: request
+        )
         guard let httpResponse = response as? HTTPURLResponse,
             httpResponse.statusCode == 200
         else {
@@ -56,7 +58,7 @@ struct Github {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.get.rawValue
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
             httpResponse.statusCode == 200
         else {
