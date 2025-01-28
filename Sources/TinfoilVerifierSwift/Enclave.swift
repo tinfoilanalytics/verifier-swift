@@ -5,10 +5,11 @@
 //  Created by Mark @ Germ on 1/27/25.
 //
 
+import CryptoKit
 import Foundation
 
 struct Enclave {
-    static func fetch(host: String) async throws -> (Document, Data) {
+    static func fetch(host: String) async throws -> (Document, SHA256.Digest) {
         var urlComponents = URLComponents()
         urlComponents.host = host
         urlComponents.scheme = URLScheme.https.rawValue
@@ -20,12 +21,22 @@ struct Enclave {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.get.rawValue
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let captureDelegate = CertCaptureDelegate()
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: captureDelegate,
+            delegateQueue: nil
+        )
+
+        let (data, response) = try await session.data(for: request)
 
         let document = try JSONDecoder().decode(Document.self, from: data)
 
-        // TODO: read and return the cert
-        throw TinfoilError.mocking
+        guard let leafCertDigest = captureDelegate.certHash else {
+            throw CertPinError.missingCertificate
+        }
+
+        return (document, leafCertDigest)
     }
 }
 
@@ -33,19 +44,4 @@ struct URLScheme {
     public static let https = URLScheme(rawValue: "https")
 
     public let rawValue: String
-}
-
-//TODO: export these types as needed from the golang library
-
-struct Document: Decodable {
-    let format: PredicateType
-    let body: String
-
-    func verify() throws -> (Measurement, Data) {
-        throw TinfoilError.mocking
-    }
-}
-
-enum PredicateType: String, Decodable {
-    case awsNitroEnclaveV1 = "https://tinfoil.sh/predicate/aws-nitro-enclave/v1"
 }

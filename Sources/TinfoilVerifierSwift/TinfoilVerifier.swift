@@ -5,6 +5,7 @@
 //  Created by Mark @ Germ on 1/27/25.
 //
 
+import CryptoKit
 import Foundation
 import TinfoilVerifier
 
@@ -77,8 +78,12 @@ public struct TinfoilClient: Codable, Sendable {
             certFingerPrint: attestedCertFP,
             eifHash: eifHash
         )
-
     }
+}
+
+extension Digest {
+    var data: Data { Data(bytes) }
+    private var bytes: [UInt8] { Array(makeIterator()) }
 }
 
 enum TinfoilError: Error {
@@ -90,21 +95,4 @@ enum TinfoilError: Error {
     case regexMiss
     case noAttestation
     case decodeFailure
-}
-
-//TODO: for Tinfoil
-//stubbing interface from the golang function interface that may be missing
-struct SigStore {
-    static func verifyMeasurementAttestation(
-        trustedRootJSON: Data,
-        bundleJSON: Data,
-        hexDigest: String,
-        repo: String
-    ) throws -> Measurement {
-        throw TinfoilError.mocking
-    }
-}
-
-struct Measurement: Equatable {
-
 }
