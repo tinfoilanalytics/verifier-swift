@@ -41,13 +41,49 @@ struct Github {
         return (decoded.tagName, .init(result.1))
     }
 
-    struct ReleaseResponse: Decodable {
+    private struct ReleaseResponse: Decodable {
         let tagName: String
         let body: String
     }
 
     static func fetchAttestationBundle(repo: String, digest: String) async throws -> Data {
-        throw TinfoilError.mocking
+        let urlString = "https://api.github.com/repos/" + repo + "/attestations/sha256:" + digest
+
+        guard let url = URL(string: urlString) else {
+            throw TinfoilError.urlConversion
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.get.rawValue
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+            httpResponse.statusCode == 200
+        else {
+            throw TinfoilError.getFailed
+        }
+
+        let attestation = try Attestation(from: data)
+
+        return attestation.bundle
+    }
+
+    struct Attestation: Decodable {
+        let bundle: Data  //JsonMessage
+
+        init(from input: Data) throws {
+            let decoded = try JSONSerialization.jsonObject(with: input)
+            guard let root = decoded as? [String: [Any]],
+                let attestation = root["attestations"]?.first as? [String: Any],
+                let bundle = attestation["bundle"]
+            else {
+                throw TinfoilError.decodeFailure
+            }
+            self.bundle = try JSONSerialization.data(
+                withJSONObject: bundle
+            )
+        }
+
     }
 }
 
@@ -56,17 +92,3 @@ public struct HTTPMethod: Hashable {
 
     public let rawValue: String
 }
-
-//
-//var responseJSON struct {
-//    TagName string `json:"tag_name"`
-//    Body    string `json:"body"`
-//}
-//if err := json.NewDecoder(releaseResponse.Body).Decode(&responseJSON); err != nil {
-//    return "", "", err
-//}
-//
-//eifRegex := regexp.MustCompile(`EIF hash: ([a-fA-F0-9]{64})`)
-//eifHash := eifRegex.FindStringSubmatch(responseJSON.Body)[1]
-//
-//return responseJSON.TagName, eifHash, nil

@@ -88,6 +88,8 @@ enum TinfoilError: Error {
     case urlConversion
     case getFailed
     case regexMiss
+    case noAttestation
+    case decodeFailure
 }
 
 //TODO: for Tinfoil
