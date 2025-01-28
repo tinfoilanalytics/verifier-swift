@@ -58,6 +58,37 @@ public struct TinfoilClient: Codable, Sendable {
             eifHash: eifHash
         )
     }
+    
+    public func data(
+        enclaveState: EnclaveState,
+        path: String
+    ) async throws -> (
+        Data,
+        URLResponse
+    ) {
+        let pinDelegate = CertPinDelegate(
+            pinnedCertDigest: enclaveState.certFingerPrint
+        )
+        
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: pinDelegate,
+            delegateQueue: nil
+        )
+        
+        var urlComponents = URLComponents()
+        urlComponents.host = enclave
+        urlComponents.scheme = URLScheme.https.rawValue
+        urlComponents.path = path
+        guard let url = urlComponents.url else {
+            throw TinfoilError.urlConversion
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.get.rawValue
+        
+        return try await session.data(for: request)
+    }
 }
 
 extension Digest {

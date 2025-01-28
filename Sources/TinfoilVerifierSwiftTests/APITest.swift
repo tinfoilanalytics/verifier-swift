@@ -26,7 +26,11 @@ struct APITest {
         let enclaveState = try await tinfoilClient.verify(
             sigStoreTrustRoot: trustRoot
         )
-
+        
+        //issue a request
+        let (data, result) = try await tinfoilClient.data(
+            enclaveState: enclaveState,
+            path: "/example"
+        )
     }
-
 }

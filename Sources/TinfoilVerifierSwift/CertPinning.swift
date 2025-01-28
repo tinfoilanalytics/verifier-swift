@@ -53,10 +53,10 @@ class CertCaptureDelegate: NSObject, URLSessionTaskDelegate {
 class CertPinDelegate: NSObject, URLSessionTaskDelegate {
     private static let logger = Logger(subsystem: "CertPinning", category: "CertPinDelegate")
 
-    let pinnedCert: SHA256.Digest
+    let pinnedCertDigest: Data
 
-    init(pinnedCert: SHA256.Digest) {
-        self.pinnedCert = pinnedCert
+    init(pinnedCertDigest: Data) {
+        self.pinnedCertDigest = pinnedCertDigest
     }
 
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async
@@ -67,7 +67,7 @@ class CertPinDelegate: NSObject, URLSessionTaskDelegate {
     {
         do {
             let sessionCert = try CertPinning.readLeafCert(challenge: challenge)
-            guard sessionCert == pinnedCert else {
+            guard sessionCert.data == pinnedCertDigest else {
                 Self.logger.error("Pinned cert mismatch")
                 return (.cancelAuthenticationChallenge, nil)
             }
