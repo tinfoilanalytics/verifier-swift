@@ -29,32 +29,43 @@ public struct TinfoilVerifier {
     }
 }
 
-extension ClientSecureClient {
+public struct TinfoilClient: Codable, Sendable {
+    public let enclave: String
+    public let repo: String
+
+    public init(enclave: String, repo: String, verifiedState: EnclaveState? = nil) {
+        self.enclave = enclave
+        self.repo = repo
+    }
+
+    public struct EnclaveState: Codable, Sendable {
+        let certFingerPrint: Data
+        let eifHash: String
+    }
+
     public func verify(
         enclaveState: ClientEnclaveState,
         sigStoreTrustRoot: Data  //cached by the application
-    ) async throws {
+    ) async throws -> EnclaveState {
         let (_, eifHash) = try await Github.fetchLatestRelease(repo: repo)
 
-        let sigStoreBundle = try await Github.fetchAttestationBundle(
+        //start these concurrently
+        async let sigStoreBundle = try await Github.fetchAttestationBundle(
             repo: repo,
             digest: eifHash
         )
+        async let (enclaveAttestation, enclaveCertFP) = try await Enclave.fetch(host: enclave)
 
-        let codeMeasurements = try SigStore.verifyMeasurementAttestation(
+        let codeMeasurements = try await SigStore.verifyMeasurementAttestation(
             trustedRootJSON: sigStoreTrustRoot,
             bundleJSON: sigStoreBundle,
             hexDigest: eifHash,
             repo: repo
         )
 
-        //since this doesn't rely on the above, seems like we can cache
-        //the validation result
-        let (enclaveAttestation, enclaveCertFP) = try await Enclave.fetch(host: enclave)
-
         let (enclaveMeasurements, attestedCertFP) = try await enclaveAttestation.verify()
 
-        guard enclaveCertFP == attestedCertFP else {
+        guard try await enclaveCertFP == attestedCertFP else {
             throw TinfoilError.mismatchedCertificates
         }
 
@@ -62,9 +73,11 @@ extension ClientSecureClient {
             throw TinfoilError.mismatchedMeasurements
         }
 
-        //mutate and return verified state
+        return .init(
+            certFingerPrint: attestedCertFP,
+            eifHash: eifHash
+        )
 
-        //        return verifiedState
     }
 }
 
@@ -72,25 +85,21 @@ enum TinfoilError: Error {
     case mocking
     case mismatchedCertificates
     case mismatchedMeasurements
+    case urlConversion
+    case getFailed
+    case regexMiss
 }
 
 //TODO: for Tinfoil
 //stubbing interface from the golang function interface that may be missing
-extension ClientSecureClient {
-    var repo: String { "inference-enclave.tinfoil.sh" }
-    var enclave: String { "tinfoilanalytics/nitro-enclave-build-demo" }
-
-    //
-}
-
 struct SigStore {
     static func verifyMeasurementAttestation(
         trustedRootJSON: Data,
         bundleJSON: Data,
         hexDigest: String,
         repo: String
-    ) throws -> Measurement? {
-        return nil
+    ) throws -> Measurement {
+        throw TinfoilError.mocking
     }
 }
 
