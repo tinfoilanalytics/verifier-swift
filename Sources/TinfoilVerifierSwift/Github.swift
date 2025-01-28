@@ -87,7 +87,7 @@ struct Github {
     }
 }
 
-public struct HTTPMethod: Hashable {
+public struct HTTPMethod {
     public static let get = HTTPMethod(rawValue: "GET")
 
     public let rawValue: String

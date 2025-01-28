@@ -108,15 +108,3 @@ struct SigStore {
 struct Measurement: Equatable {
 
 }
-
-struct Enclave {
-    static func fetch(host: String) async throws -> (Document, Data) {
-        throw TinfoilError.mocking
-    }
-}
-
-struct Document {
-    func verify() throws -> (Measurement, Data) {
-        throw TinfoilError.mocking
-    }
-}
