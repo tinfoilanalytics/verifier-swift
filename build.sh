@@ -5,7 +5,7 @@ rm -rf TinfoilVerifier.xcframework verifier
 
 LATEST_TAG=$(curl -sL https://api.github.com/repos/tinfoilsh/verifier/releases/latest | jq -r ".tag_name")
 
-git clone https://github.com/tinfoilanalytics/verifier -b "$LATEST_TAG"
+git clone https://github.com/tinfoilsh/verifier -b "$LATEST_TAG"
 
 cd verifier
 go get golang.org/x/mobile/cmd/gomobile
