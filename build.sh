@@ -3,13 +3,13 @@ set -ex
 
 rm -rf TinfoilVerifier.xcframework verifier
 
-LATEST_TAG=$(curl -sL https://api.github.com/repos/tinfoilanalytics/verifier/releases/latest | jq -r ".tag_name")
+LATEST_TAG=$(curl -sL https://api.github.com/repos/tinfoilsh/verifier/releases/latest | jq -r ".tag_name")
 
 git clone https://github.com/tinfoilanalytics/verifier -b "$LATEST_TAG"
 
 cd verifier
 go get golang.org/x/mobile/cmd/gomobile
-gomobile bind -target=ios -o ../TinfoilVerifier.xcframework github.com/tinfoilanalytics/verifier/pkg/client
+gomobile bind -target=ios -o ../TinfoilVerifier.xcframework github.com/tinfoilsh/verifier/pkg/client
 go mod tidy
 cd ..
 
