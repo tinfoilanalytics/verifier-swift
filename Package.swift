@@ -9,10 +9,20 @@ let package = Package(
     products: [
         .library(
             name: "TinfoilVerifier",
-            targets: ["TinfoilVerifier"])
+            targets: ["TinfoilVerifierSwift"])
     ],
     targets: [
+        .target(
+            name: "TinfoilVerifierSwift",
+            dependencies: [
+                "TinfoilVerifier"
+            ]
+        ),
         .binaryTarget(
             name: "TinfoilVerifier",
-            path: "TinfoilVerifier.xcframework")
+            path: "TinfoilVerifier.xcframework"),
+        .testTarget(
+            name: "TinfoilVerifierSwiftTests",
+            dependencies: ["TinfoilVerifierSwift"]
+        ),
     ])
