@@ -19,4 +19,4 @@ sed -i.bak -E 's/(\.package\(url: "https:\/\/github\.com\/tinfoilsh\/verifier-sw
 git add Package.swift README.md
 git commit -m "chore: update verifier to $LATEST_TAG"
 git tag "$LATEST_TAG"
-git push --tags
+git push origin main --tags
