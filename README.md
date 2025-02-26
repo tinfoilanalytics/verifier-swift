@@ -16,7 +16,7 @@ Alternatively, you can add it directly to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/tinfoilsh/verifier-swift", exact: "0.0.21")
+    .package(url: "https://github.com/tinfoilsh/verifier-swift", exact: "0.0.22")
 ]
 ```
 
